@@ -94,7 +94,7 @@ ul.menu { list-style: none; padding: .2em 0; font-family: var(--pixel); font-siz
 .head { display: flex; gap: .9em; align-items: center; }
 .head > div:last-child { min-width: 0; }
 .hint { font-family: var(--pixel); font-size: 1.25em; color: var(--dim); margin-top: .7em; }
-.chips { display: flex; flex-wrap: wrap; gap: .35em; margin-top: .35em; }
+.chips { display: flex; flex-wrap: wrap; gap: .35em; margin: .5em 0; font-size: .9em; }
 .chips span { padding: .1em .6em; border: 1px solid var(--line); border-radius: 1em; background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .btn { display: inline-block; margin: .4em .4em 0 0; padding: .3em .9em; border-radius: .3em; color: #fff !important; text-decoration: none; font-weight: 600; background: linear-gradient(var(--acc1), var(--acc2)); }
 .rows { margin-top: .6em; }
@@ -249,9 +249,16 @@ const DATA = {
     role: "First-year Engineering @ UBC",
     location: "Calgary → Vancouver",
     bio: [
-      "BASc, General Engineering at UBC (intended major: Computer Engineering), expected Apr. 2030.",
-      "Interested in AI/ML, LLM integration, and systems programming.",
-      "From Calgary, now in Vancouver."
+      "First-year Engineering student at UBC, intended major Computer Engineering, graduating Apr. 2030.",
+      "I build things that sit close to the machine or close to an LLM: a C tool that manages its own memory, and a care app that checks every Gemini answer against its source before showing it.",
+      "Interested in AI/ML, LLM integration, and systems programming. From Calgary, now in Vancouver."
+    ],
+    education: [
+      { title: "University of British Columbia", org: "Vancouver, BC", date: "Expected Apr. 2030",
+        desc: "Bachelor of Applied Science, Engineering. Intended major: Computer Engineering.",
+        notes: ["APSC 160: Computation in Engineering Design (C)", "APSC 100: Engineering Design"] },
+      { title: "Master's Academy & College", org: "Calgary, AB", date: "Sep. 2023 to Jun. 2026",
+        desc: "High School Diploma, Honours with Distinction, 95% average.", notes: [] }
     ]
   },
   links: {
@@ -268,11 +275,15 @@ const DATA = {
       title: "KinCard: Dementia Care App",
       artist: "TypeScript, Next.js, React, Gemini API, Databricks, Auth0, Vercel",
       album: "HackCamp 2026", date: "Nov. 2026",
-      desc: "Caregivers scan a QR code to view a patient's care card.",
+      desc: "Co-built at HackCamp 2026. Caregivers scan a QR code to view a patient's care card, so anyone stepping in knows who they are caring for.",
+      tags: ["LLM Integration", "Output Validation", "Authentication", "Testing", "SQL"],
       highlights: [
-        "Built 6 Gemini API features including multimodal voice transcription, translation, and privacy redaction.",
-        "Wrote validators that catch LLM hallucinations by checking output against its source, with tests using mocked Gemini responses.",
-        "Auth0 OAuth 2.0 login, HMAC-signed sessions, per-family data isolation, and Databricks Delta tables."
+        "Built 6 Gemini API features, including multimodal voice transcription, translation, and privacy redaction.",
+        "Wrote validators that catch LLM hallucinations by checking each output against its source, with safe fallbacks.",
+        "Wrote automated tests with mocked Gemini responses to prove the validators reject bad or incomplete output.",
+        "Stored care cards and visit logs in Databricks Delta tables using SQL and optimistic concurrency.",
+        "Deployed on Vercel with Auth0 (OAuth 2.0) login, HMAC-signed sessions, and per-family data isolation.",
+        "Presented the technical design to judges and led the team's Q&A."
       ],
       link: "[KINCARD_URL]"
     },
@@ -280,11 +291,12 @@ const DATA = {
       title: "CLI Cryptocurrency Price Tracker",
       artist: "C, libcurl, cJSON, Make",
       album: "Personal", date: "Aug. 2026",
-      desc: "Command-line tool that fetches live prices and 24h changes from the CoinGecko REST API.",
+      desc: "A command-line tool in C that fetches live prices and 24-hour changes from the CoinGecko REST API.",
+      tags: ["Systems Programming", "Memory Management", "REST APIs", "Build Tooling"],
       highlights: [
-        "HTTPS requests with header-based API key auth.",
-        "Dynamic allocation (malloc/realloc) for variable-length responses.",
-        "Modular networking, parsing, and orchestration with a Makefile."
+        "Sent HTTPS requests with libcurl using header-based API key authentication, and parsed JSON with cJSON.",
+        "Replaced a fixed-size buffer with dynamic allocation (malloc/realloc) to safely handle variable-length responses.",
+        "Split the code into networking, parsing, and orchestration modules with a Makefile build."
       ],
       link: "[CRYPTO_URL]"
     },
@@ -292,29 +304,35 @@ const DATA = {
       title: "Request-Blocking Browser Extension",
       artist: "JavaScript, Chrome Extensions API (Manifest V3), HTML/CSS",
       album: "Personal", date: "Apr. 2026",
-      desc: "Blocks unwanted network requests and injected DOM elements.",
+      desc: "A Manifest V3 Chrome extension that blocks unwanted network requests and injected DOM elements.",
+      tags: ["Browser Internals", "Least Privilege", "Network Filtering"],
       highlights: [
-        "declarativeNetRequest rules plus content scripts.",
-        "Least privilege with no broad host permissions."
+        "Filtered traffic with declarativeNetRequest rules and cleaned pages with content scripts.",
+        "Followed least privilege by filtering requests without broad host permissions."
       ],
       link: "[EXTENSION_URL]"
     }
   ],
   awards: [
     { title: "Imaginal BOLD Challenge Winner", date: "2025", desc: "Pitched an AI triage concept to cut walk-in clinic wait times." },
-    { title: "ASCEND Scholarship", date: "Jun. 2026", desc: "Awarded for creative and innovative use of technology." },
-    { title: "Alexander Rutherford Scholarship", date: "Aug. 2026", desc: "" }
+    { title: "ASCEND Scholarship", date: "Jun. 2026", desc: "$1,500, awarded for creative and innovative use of technology." },
+    { title: "Alexander Rutherford Scholarship", date: "Aug. 2026", desc: "$2,500, awarded for an 80%+ average in Grade 10 to 12 courses." },
+    { title: "Varsity Athlete", date: "", desc: "Varsity Basketball, Volleyball, and Badminton." }
   ],
   leadership: [
-    { title: "Youth Basketball Head Coach", date: "Oct. 2024 to Mar. 2026", desc: "Led 12+ youth athletes." },
-    { title: "Tutoring Program Co-Leader", date: "Oct. 2025 to Mar. 2026", desc: "Matched 20+ students with mentors." },
-    { title: "Event Associate, StudyIn", date: "Sep. 2025 to Mar. 2026", desc: "Ran events with 200+ attendees." }
+    { title: "Youth Basketball Head Coach", org: "Master's Academy & College, Calgary, AB", date: "Oct. 2024 to Mar. 2026",
+      desc: "Led and mentored 12+ youth athletes, planning weekly practices that improved skills and team cohesion." },
+    { title: "Tutoring Program Co-Leader", org: "Master's Tutoring Program, Calgary, AB", date: "Oct. 2025 to Mar. 2026",
+      desc: "Co-led daily operations and scheduling for a peer tutoring program, matching 20+ students with mentors." },
+    { title: "Event Associate", org: "StudyIn, Calgary, AB", date: "Sep. 2025 to Mar. 2026",
+      desc: "Ran logistics, registration, and check-in for community events with 200+ attendees." }
   ],
   skills: {
     Languages: ["C", "TypeScript", "JavaScript", "Python", "SQL", "HTML/CSS"],
     Frameworks: ["Next.js", "React", "Node.js", "libcurl", "cJSON"],
-    Tools: ["Git", "GitHub", "Make", "Vercel", "Databricks", "Chrome Extensions"],
-    APIs: ["Gemini API", "Auth0 (OAuth 2.0)", "REST APIs", "CoinGecko API"]
+    Tools: ["Git", "GitHub", "Make", "Vercel", "Databricks", "Chrome Extensions (Manifest V3)"],
+    APIs: ["Gemini API", "Auth0 (OAuth 2.0)", "REST APIs", "CoinGecko API"],
+    Concepts: ["Data Structures & Algorithms", "Memory Management", "LLM Integration", "Authentication"]
   },
   // Optional per track: cover: "./music/cover1.jpg", album: "Album name"
   playlist: [
@@ -354,6 +372,7 @@ function h(tag, props, ...kids) {
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const isUrl = u => /^(https?:\/\/|mailto:|\.{0,2}\/)/.test(u || "");
+const when = a => [a.date, a.org].filter(Boolean).join(" | ");
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const WIDE = matchMedia("(min-width: 800px)");     // wide = menu + preview side by side
@@ -565,7 +584,7 @@ function mainMenu() {
     { label: "Projects", open: projectsMenu, preview: () => [
         h("h2", { text: "Projects" }), h("p", { class: "sub", text: "Each one is a track. Pick one for the full liner notes." }),
         h("div", { class: "rows" }, DATA.projects.map((p, i) => h("button", { onclick: () => jump(projectsMenu, i) },
-          h("b", { text: p.title }), h("small", { text: `${p.album} | ${p.date}` }), h("div", { text: p.desc }))))] },
+          h("b", { text: p.title }), h("small", { text: `${p.album} | ${p.date} | ${p.artist}` }), h("div", { text: p.desc }))))] },
     { label: "Music", open: musicMenu, preview: () => [
         h("h2", { text: "Music" }), h("p", { class: "sub", text: "A real playlist. It keeps playing while you browse." }),
         h("div", { class: "rows" }, DATA.playlist.map((t, i) => h("button", { onclick: () => { playTrack(i); jump(musicMenu, i); } },
@@ -573,7 +592,8 @@ function mainMenu() {
     { label: "About", open: aboutMenu, preview: () => [
         h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }),
         A.bio.map(b => h("p", { text: b })),
-        h("h3", { text: "Gold Records" }), h("ul", null, DATA.awards.map(a => h("li", { text: `${a.title} (${a.date})` }))),
+        h("h3", { text: "Education" }), h("ul", null, A.education.map(a => h("li", { text: `${a.title}: ${a.desc}` }))),
+        h("h3", { text: "Gold Records" }), h("ul", null, DATA.awards.map(a => h("li", { text: a.title + (a.date ? ` (${a.date})` : "") + ": " + a.desc }))),
         h("h3", { text: "Liner Notes" }), h("ul", null, DATA.leadership.map(a => h("li", { text: `${a.title}, ${a.date}` })))] },
     { label: "Equalizer", open: eqScreen },
     { label: "Contact", open: contactMenu, preview: () => [
@@ -612,6 +632,7 @@ function projectScreen(p, i) {
       h("div", null, h("h2", { text: p.title }), h("p", { class: "sub", text: `${p.album} | ${p.date}` }))),
     h("p", { class: "sub", text: p.artist }),
     h("p", { text: p.desc }),
+    p.tags ? h("div", { class: "chips" }, p.tags.map(t => h("span", { text: t }))) : null,
     h("ul", null, p.highlights.map(x => h("li", { text: x }))),
     ok ? h("a", { class: "btn", href: p.link, target: "_blank", rel: "noopener", text: "Open project" })
        : h("p", { class: "sub", text: "Link coming soon." })
@@ -622,12 +643,15 @@ function projectScreen(p, i) {
 function aboutMenu() {
   const A = DATA.about;
   const row = (a, group) => ({ label: a.title, group, open: () => detail(group, () => [
-    h("h2", { text: a.title }), h("p", { class: "sub", text: a.date }), a.desc ? h("p", { text: a.desc }) : null]) });
+    h("h2", { text: a.title }), when(a) ? h("p", { class: "sub", text: when(a) }) : null,
+    a.desc ? h("p", { text: a.desc }) : null,
+    a.notes && a.notes.length ? [h("h3", { text: "Relevant Coursework" }), h("ul", null, a.notes.map(n => h("li", { text: n })))] : null]) });
   return menu("About", [
     { label: "About Me", open: () => detail("About Me", () => [
         h("div", { class: "head" }, art(DATA.initials),
           h("div", null, h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }))),
         A.bio.map(b => h("p", { text: b }))]) },
+    ...A.education.map(a => row(a, "Education")),
     ...DATA.awards.map(a => row(a, "Gold Records")),
     ...DATA.leadership.map(a => row(a, "Liner Notes"))
   ]);
@@ -953,7 +977,7 @@ if (navigator.getBattery) navigator.getBattery().then(b => {
 /** Plain copy of all content, built from DATA. Hidden for screen readers and crawlers until Plain view shows it. */
 function buildFallback() {
   const L = DATA.links, sec = (t, ...k) => h("section", null, h("h2", { text: t }), ...k);
-  const rows = list => h("ul", null, list.map(a => h("li", { text: `${a.title} (${a.date})${a.desc ? ": " + a.desc : ""}` })));
+  const rows = list => h("ul", null, list.map(a => h("li", { text: a.title + (when(a) ? ` (${when(a)})` : "") + (a.desc ? ": " + a.desc : "") })));
   $("#fallback").append(
     h("h1", { text: DATA.name }),
     h("p", { text: `${DATA.about.role}. ${DATA.about.bio.join(" ")}` }),
@@ -961,9 +985,11 @@ function buildFallback() {
       h("a", { href: L.github, text: "GitHub" }), " | ", h("a", { href: "mailto:" + L.email, text: L.email })),
     sec("Projects", DATA.projects.map(p => h("article", null,
       h("h3", { text: p.title }),
-      h("p", { text: `${p.artist}. ${p.album}, ${p.date}. ${p.desc}` }),
+      h("p", { text: `${p.album}, ${p.date}. ${p.artist}.` }), h("p", { text: p.desc }),
       h("ul", null, p.highlights.map(x => h("li", { text: x }))),
       isUrl(p.link) ? h("a", { href: p.link, text: "Project link" }) : null))),
+    sec("Education", DATA.about.education.map(a => [h("h3", { text: a.title }), h("p", { text: `${when(a)}. ${a.desc}` }),
+      a.notes.length ? h("p", { text: "Relevant coursework: " + a.notes.join("; ") + "." }) : null])),
     sec("Awards", rows(DATA.awards)),
     sec("Leadership", rows(DATA.leadership)),
     sec("Skills", h("ul", null, Object.entries(DATA.skills).map(([c, l]) => h("li", { text: `${c}: ${l.join(", ")}` })))));
