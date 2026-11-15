@@ -659,7 +659,7 @@ function projectScreen(p, i) {
     h("ul", null, p.highlights.map(x => h("li", { text: x }))),
     ok ? h("a", { class: "btn", href: p.link, target: "_blank", rel: "noopener", text: p.linkLabel || "Open live demo" }) : null,
     p.linkNote ? h("p", { class: "sub", text: p.linkNote }) : null
-  ], ok ? { label: (p.linkLabel || "Open live demo").toLowerCase(), run: () => openLink(p.link) } : null);
+  ]);                                          // selecting a project only shows this page; the button opens the site
 }
 
 /** About: bio, then awards and leadership as grouped rows */
