@@ -2,7 +2,7 @@
 
 A personal portfolio that works like a retro MP3 player. The whole page is the player's screen: a menu on the left, a live preview on the right, and a transport bar that plays real audio.
 
-Live site: https://portfolio-mu-sandy-2lq0sdgm6g.vercel.app
+Live site: https://alexanderlee.vercel.app
 
 ## How it is built
 
