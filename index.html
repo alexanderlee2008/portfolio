@@ -102,6 +102,8 @@ ul.menu { list-style: none; padding: .2em 0; font-size: 1.75em; line-height: 1.2
 .head > div:last-child { min-width: 0; }
 .hint { font-size: 1.25em; color: var(--dim); margin-top: .7em; }
 .detail .hint { font-size: 1em; }
+.seek { margin: .6em 0; padding: .15em .6em; border-left: calc(var(--px) * 2) solid var(--acc2); background: color-mix(in srgb, var(--acc1) 16%, transparent); }
+.now .seek { font-size: 1.3em; line-height: 1.15; }
 .chips { display: flex; flex-wrap: wrap; gap: .4em; margin: .5em 0; font-size: .9em; }
 .chips span { padding: 0 .5em; border: var(--px) solid var(--line); background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15em), 1fr)); gap: .8em; margin: .8em 0; }
@@ -274,6 +276,8 @@ const DATA = {
   about: {
     role: "First-year Engineering @ UBC",
     location: "Calgary → Vancouver",
+    // Shown on the landing card, About, Contact and Plain view. Set to "" to hide it.
+    seeking: "Looking for a Summer 2027 software internship in Vancouver or Calgary.",
     bio: [
       "First-year Engineering student at UBC, intended major Computer Engineering, graduating Apr. 2030.",
       "I build things that sit close to the machine or close to an LLM: a C tool that manages its own memory, and a care app that checks every Gemini answer against its source before showing it.",
@@ -316,6 +320,7 @@ const DATA = {
       media: [{ src: "./media/kincard-landing.jpg", caption: "Landing page with a sample care card" }],
       link: "https://kin-card.vercel.app/",
       linkLabel: "Open live site",
+      repo: "https://github.com/alexanderlee2008/KinCard",      // optional second button: "View code on GitHub"
       linkNote: "The landing page is live. Sign-in is closed because the hackathon backend has been shut down."
     },
     {
@@ -329,7 +334,8 @@ const DATA = {
         "Replaced a fixed-size buffer with dynamic allocation (malloc/realloc) to safely handle variable-length responses.",
         "Split the code into networking, parsing, and orchestration modules with a Makefile build."
       ],
-      link: ""                    // no public demo; add a URL here when there is one
+      link: "https://github.com/alexanderlee2008/crypto-tracker",
+      linkLabel: "View code on GitHub"
     },
     {
       title: "Request-Blocking Browser Extension",
@@ -341,7 +347,8 @@ const DATA = {
         "Filtered traffic with declarativeNetRequest rules and cleaned pages with content scripts.",
         "Followed least privilege by filtering requests without broad host permissions."
       ],
-      link: ""
+      link: "https://github.com/alexanderlee2008/Browser-Tools",
+      linkLabel: "View code on GitHub"
     }
   ],
   awards: [
@@ -403,6 +410,7 @@ function h(tag, props, ...kids) {
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const isUrl = u => /^(https?:\/\/|mailto:|\.{0,2}\/)/.test(u || "");
+const lookingFor = () => (DATA.about.seeking ? h("p", { class: "seek", text: DATA.about.seeking }) : null);
 const when = a => [a.date, a.org].filter(Boolean).join(" | ");
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -623,13 +631,13 @@ function mainMenu() {
           h("b", { text: t.title }), h("small", { text: t.artist }))))] },
     { label: "About", open: aboutMenu, preview: () => [
         h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }),
-        A.bio.map(b => h("p", { text: b })),
+        lookingFor(), A.bio.map(b => h("p", { text: b })),
         h("h3", { text: "Education" }), h("ul", null, A.education.map(a => h("li", { text: `${a.title}: ${a.desc}` }))),
         h("h3", { text: "Gold Records" }), h("ul", null, DATA.awards.map(a => h("li", { text: a.title + (a.date ? ` (${a.date})` : "") + ": " + a.desc }))),
         h("h3", { text: "Liner Notes" }), h("ul", null, DATA.leadership.map(a => h("li", { text: `${a.title}, ${a.date}` })))] },
     { label: "Equalizer", open: eqScreen },
     { label: "Contact", open: contactMenu, preview: () => [
-        h("h2", { text: "Contact" }), h("p", { text: "Resume, profiles, and email." }),
+        h("h2", { text: "Contact" }), lookingFor(), h("p", { text: "Resume, profiles, and email." }),
         h("p", null, h("a", { class: "btn", href: L.resume, download: "", text: "Download resume (PDF)" })),
         h("p", null, h("a", { class: "btn", href: L.linkedin, target: "_blank", rel: "noopener", text: "LinkedIn" }),
           h("a", { class: "btn", href: L.github, target: "_blank", rel: "noopener", text: "GitHub" }),
@@ -681,6 +689,7 @@ function projectScreen(p, i) {
     gallery(p.media),
     h("ul", null, p.highlights.map(x => h("li", { text: x }))),
     ok ? h("a", { class: "btn", href: p.link, target: "_blank", rel: "noopener", text: p.linkLabel || "Open live demo" }) : null,
+    isUrl(p.repo) ? h("a", { class: "btn", href: p.repo, target: "_blank", rel: "noopener", text: "View code on GitHub" }) : null,
     p.linkNote ? h("p", { class: "sub", text: p.linkNote }) : null
   ]);                                          // selecting a project only shows this page; the button opens the site
 }
@@ -696,7 +705,7 @@ function aboutMenu() {
     { label: "About Me", open: () => detail("About Me", () => [
         h("div", { class: "head" }, art(DATA.initials),
           h("div", null, h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }))),
-        A.bio.map(b => h("p", { text: b }))]) },
+        lookingFor(), A.bio.map(b => h("p", { text: b }))]) },
     ...A.education.map(a => row(a, "Education")),
     ...DATA.awards.map(a => row(a, "Gold Records")),
     ...DATA.leadership.map(a => row(a, "Liner Notes"))
@@ -808,6 +817,7 @@ const RENDER = {
         h("div", { class: "head" }, art(DATA.initials),
           h("div", null, h("div", { class: "t" }, h("span", { text: DATA.name })),
             h("div", { class: "a", text: DATA.about.role }), h("div", { class: "al", text: DATA.about.location }))),
+        lookingFor(),
         DATA.about.bio.map(b => h("p", { class: "bio", text: b })),
         h("div", { class: "hint", text: "Press play to start the music" }));
     }
@@ -1043,6 +1053,7 @@ function buildFallback() {
   const rows = list => h("ul", null, list.map(a => h("li", { text: a.title + (when(a) ? ` (${when(a)})` : "") + (a.desc ? ": " + a.desc : "") })));
   $("#fallback").append(
     h("h1", { text: DATA.name }),
+    DATA.about.seeking ? h("p", null, h("strong", { text: DATA.about.seeking })) : null,
     h("p", { text: `${DATA.about.role}. ${DATA.about.bio.join(" ")}` }),
     h("p", null, h("a", { href: L.resume, text: "Resume (PDF)" }), " | ", h("a", { href: L.linkedin, text: "LinkedIn" }), " | ",
       h("a", { href: L.github, text: "GitHub" }), " | ", h("a", { href: "mailto:" + L.email, text: L.email })),
@@ -1050,6 +1061,7 @@ function buildFallback() {
       h("h3", { text: p.title }),
       h("p", { text: `${p.album}, ${p.date}. ${p.artist}.` }), h("p", { text: p.desc }),
       h("ul", null, p.highlights.map(x => h("li", { text: x }))),
+      isUrl(p.repo) ? h("p", null, h("a", { href: p.repo, text: "Code on GitHub" })) : null,
       isUrl(p.link) ? h("p", null, h("a", { href: p.link, text: p.linkLabel || "Live demo" }), p.linkNote ? " " + p.linkNote : "") : null))),
     sec("Education", DATA.about.education.map(a => [h("h3", { text: a.title }), h("p", { text: `${when(a)}. ${a.desc}` }),
       a.notes.length ? h("p", { text: "Relevant coursework: " + a.notes.join("; ") + "." }) : null])),
