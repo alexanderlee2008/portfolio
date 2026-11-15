@@ -75,6 +75,7 @@ ul.menu { list-style: none; padding: .2em 0; font-family: var(--pixel); font-siz
 .menu li span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .menu li .val { opacity: .7; white-space: nowrap; }
 .menu li .chev { visibility: hidden; }
+.menu li[data-i]:not(.sel):hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
 .menu li.sel { color: #fff; background: linear-gradient(var(--acc1), var(--acc2)); }
 .menu li.sel .chev { visibility: visible; }
 .menu li.sel .val { opacity: 1; }
@@ -215,7 +216,7 @@ body.plain #fallback a { color: #1c5ccb; }
   <div class="body">
     <div class="side">
       <nav id="viewport" aria-label="Player menu"></nav>
-      <p class="keys">Arrow keys move. Enter opens. Esc goes back. Space plays.</p>
+      <p class="keys">Click to select, click again to open. Arrow keys move, Enter opens, Esc goes back, Space plays.</p>
     </div>
     <section id="pane" aria-label="Preview"></section>
   </div>
@@ -759,8 +760,13 @@ const RENDER = {
       group = it.group || null;
       ul.append(h("li", {
         role: "menuitem", "data-i": i,
-        onclick: () => { v.sel = i; syncSel(); blip(); activate(it); },
-        onpointermove: e => { if (e.pointerType === "mouse" && v.sel !== i) { v.sel = i; syncSel(); } }   // hover previews
+        // Wide screens: first click selects the row (and shows its preview), clicking the selected row opens it.
+        // Narrow screens have no preview, so a tap opens straight away.
+        onclick: () => {
+          const already = v.sel === i;
+          v.sel = i; syncSel(); blip();
+          if (already || !WIDE.matches) activate(it);
+        }
       }, h("span", { text: it.label }),
         it.value ? h("span", { class: "val", text: it.value() })
                  : h("span", { class: "chev", "aria-hidden": "true", text: it.open ? ">" : "" })));
