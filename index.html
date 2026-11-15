@@ -8,6 +8,8 @@
 <meta property="og:title" content="Alexander Lee | Portfolio">
 <meta property="og:description" content="A portfolio you navigate like a retro MP3 player. Projects in AI/ML, LLM integration, and systems programming.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://portfolio-mu-sandy-2lq0sdgm6g.vercel.app/media/share.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#dbe3ea">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9ccd2'/%3E%3Crect x='6' y='4' width='20' height='10' rx='2' fill='%23223'/%3E%3Ccircle cx='16' cy='22' r='6' fill='%23fff'/%3E%3C/svg%3E">
 <style>
@@ -31,6 +33,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .app {
   /* theme colours, overwritten from THEMES in JS */
   --bg1: #f2f6f9; --bg2: #dbe3ea; --ink: #1b2430; --acc1: #63adff; --acc2: #1c5ccb; --link: #1c5ccb;
+  --accm: color-mix(in srgb, var(--acc1) 45%, var(--acc2));   /* mid accent: light enough to read as a highlight, dark enough for white text */
   --dim: color-mix(in srgb, var(--ink) 62%, transparent);
   --line: color-mix(in srgb, var(--ink) 28%, transparent);
   --panel: linear-gradient(color-mix(in srgb, var(--bg1), #fff 12%), color-mix(in srgb, var(--bg2), #000 7%));
@@ -80,9 +83,13 @@ ul.menu { list-style: none; padding: .2em 0; font-size: 1.75em; line-height: 1.2
   .menu li.long:hover .in, .menu li.long.sel .in { display: inline-block; animation: marquee 4.5s ease-in-out infinite alternate; }
 }
 .menu li .val { opacity: .7; white-space: nowrap; }
-.menu li .chev { visibility: hidden; }
+.menu li small { font-size: .6em; opacity: .75; }
+.menu li .chev { visibility: hidden; white-space: nowrap; }
+.menu li .chev::after { content: ">"; }
+.menu li .chev.m::before { content: "open "; font-size: .6em; }      /* cue that a second click goes in */
+.menu li:focus-visible { outline-offset: -.12em; }
 .menu li[data-i]:not(.sel):hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
-.menu li.sel { color: #fff; background: linear-gradient(var(--acc1), var(--acc2)); }
+.menu li.sel { color: #fff; background: linear-gradient(var(--accm), var(--acc2)); }
 .menu li.sel .chev { visibility: visible; }
 .menu li.sel .val { opacity: 1; }
 .menu li.group { font-size: .58em; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); padding: 1em .9em .2em; cursor: default; }
@@ -114,7 +121,7 @@ ul.menu { list-style: none; padding: .2em 0; font-size: 1.75em; line-height: 1.2
   display: inline-block; margin: .4em .6em .3em 0; padding: .05em .8em; color: #fff !important; text-decoration: none;
   background: var(--acc2); border: var(--px) solid var(--ink); box-shadow: var(--px) var(--px) 0 var(--ink);
 }
-.btn:hover { background: var(--acc1); }
+.btn:hover { background: var(--accm); }
 .rows { margin-top: .6em; }
 .rows button { display: block; width: 100%; text-align: left; padding: .55em .7em; border-top: 1px solid var(--line); }
 .rows button:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
@@ -165,7 +172,7 @@ ul.menu { list-style: none; padding: .2em 0; font-size: 1.75em; line-height: 1.2
 .transport button:hover { background: color-mix(in srgb, var(--bg1), var(--ink) 12%); }
 .transport svg { width: 1.2em; height: 1.2em; fill: currentColor; }
 #bPlay { color: #fff; background: var(--acc2); }
-#bPlay:hover { background: var(--acc1); }
+#bPlay:hover { background: var(--accm); }
 #tpTitle { flex: 0 1 13em; min-width: 0; font-size: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #tpTime { font-size: 1.2em; min-width: 2.6em; text-align: right; }
 /* Sliders: square track and thumb, filled up to the thumb (--fill is set from JS) */
@@ -192,7 +199,9 @@ input[type=range]::-moz-range-thumb { width: .5em; height: 1.2em; border-radius:
 #overlay .bar i { display: block; height: 100%; background: var(--acc1); }
 
 /* Narrow screens: one column, tapping an item opens it full width */
+@media (min-width: 800px) { .menu li .chev:not(.m) { display: none; } }   /* pages already show in the preview */
 @media (max-width: 799px) {
+  .menu li .chev.m::before { content: none; }
   .side { flex: 1; border: 0; }
   #pane, .keys, #tpVol, #bPlain .w { display: none; }
   ul.menu { font-size: 2em; }
@@ -239,7 +248,7 @@ body.plain #fallback a { color: #1c5ccb; }
   <div class="body">
     <div class="side">
       <nav id="viewport" aria-label="Player menu"></nav>
-      <p class="keys">Click to select, click again to open. Arrow keys move, Enter opens, Esc goes back, Space plays.</p>
+      <p class="keys">Click to select, click again to open. Arrow keys move, Enter opens, Esc or your browser's Back goes back, Space plays.</p>
     </div>
     <section id="pane" aria-label="Preview"></section>
   </div>
@@ -348,6 +357,21 @@ const DATA = {
         "Followed least privilege by filtering requests without broad host permissions."
       ],
       link: "https://github.com/alexanderlee2008/Browser-Tools",
+      linkLabel: "View code on GitHub"
+    },
+    {
+      title: "LeePod: This Portfolio",
+      artist: "HTML, CSS, JavaScript, Web Audio API, Vercel Functions, Upstash Redis",
+      album: "Personal", date: "Nov. 2026",
+      desc: "The site you are using: a portfolio that works like an MP3 player and plays real audio.",
+      tags: ["Vanilla JS", "Web Audio", "Serverless", "Accessibility"],
+      highlights: [
+        "One HTML file with no framework and no build step. All content lives in a single data object.",
+        "Real playback through one audio element, with an equalizer driven by a Web Audio analyser and lock-screen controls through the Media Session API.",
+        "A serverless function on Vercel counts visits, project views, and song plays in an Upstash Redis store.",
+        "Split-screen layout on desktop, single column on phones, full keyboard control, shareable links to each project, and a plain view for quick reading."
+      ],
+      link: "https://github.com/alexanderlee2008/portfolio",
       linkLabel: "View code on GitHub"
     }
   ],
@@ -615,34 +639,39 @@ const nowScreen = () => ({ kind: "now", title: "Now Playing" });
 const stack = [];
 const topView = () => stack[stack.length - 1];
 /** Jump straight into a submenu with one item highlighted */
-function jump(menuFn, i) { const m = menuFn(); m.sel = i; stack.length = 1; push(m); }
+function jump(label, i) {
+  const main = stack[0], at = main.items.findIndex(x => x.label === label);
+  main.sel = at; stack.length = 1;
+  const m = main.items[at].open(); m.slug = slug(label); m.sel = i;
+  push(m);
+}
 
 function mainMenu() {
   const L = DATA.links, A = DATA.about;
   return menu(DATA.deviceName, [
-    { label: "Now Playing", open: nowScreen },
-    { label: "Projects", open: projectsMenu, preview: () => [
+    { label: "Now Playing", sub: "About me", open: nowScreen },
+    { label: "Projects", menu: true, open: projectsMenu, preview: () => [
         h("h2", { text: "Projects" }), h("p", { class: "sub", text: "Each one is a track. Pick one for the full liner notes." }),
-        h("div", { class: "rows" }, DATA.projects.map((p, i) => h("button", { onclick: () => jump(projectsMenu, i) },
+        h("div", { class: "rows" }, DATA.projects.map((p, i) => h("button", { onclick: () => jump("Projects", i) },
           h("b", { text: p.title }), h("small", { text: `${p.album} | ${p.date} | ${p.artist}` }), h("div", { text: p.desc }))))] },
-    { label: "Music", open: musicMenu, preview: () => [
+    { label: "Music", menu: true, open: musicMenu, preview: () => [
         h("h2", { text: "Music" }), h("p", { class: "sub", text: "A real playlist. It keeps playing while you browse." }),
-        h("div", { class: "rows" }, DATA.playlist.map((t, i) => h("button", { onclick: () => { playTrack(i); jump(musicMenu, i); } },
+        h("div", { class: "rows" }, DATA.playlist.map((t, i) => h("button", { onclick: () => { playTrack(i); jump("Music", i); } },
           h("b", { text: t.title }), h("small", { text: t.artist }))))] },
-    { label: "About", open: aboutMenu, preview: () => [
+    { label: "About", sub: "Education, awards", menu: true, open: aboutMenu, preview: () => [
         h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }),
         lookingFor(), A.bio.map(b => h("p", { text: b })),
         h("h3", { text: "Education" }), h("ul", null, A.education.map(a => h("li", { text: `${a.title}: ${a.desc}` }))),
-        h("h3", { text: "Gold Records" }), h("ul", null, DATA.awards.map(a => h("li", { text: a.title + (a.date ? ` (${a.date})` : "") + ": " + a.desc }))),
-        h("h3", { text: "Liner Notes" }), h("ul", null, DATA.leadership.map(a => h("li", { text: `${a.title}, ${a.date}` })))] },
-    { label: "Equalizer", open: eqScreen },
-    { label: "Contact", open: contactMenu, preview: () => [
+        h("h3", { text: "Gold Records \u00B7 Awards" }), h("ul", null, DATA.awards.map(a => h("li", { text: a.title + (a.date ? ` (${a.date})` : "") + ": " + a.desc }))),
+        h("h3", { text: "Liner Notes \u00B7 Leadership" }), h("ul", null, DATA.leadership.map(a => h("li", { text: `${a.title}, ${a.date}` })))] },
+    { label: "Equalizer", sub: "Skills", open: eqScreen },
+    { label: "Contact", sub: "Resume, links", menu: true, open: contactMenu, preview: () => [
         h("h2", { text: "Contact" }), lookingFor(), h("p", { text: "Resume, profiles, and email." }),
         h("p", null, h("a", { class: "btn", href: L.resume, download: "", text: "Download resume (PDF)" })),
         h("p", null, h("a", { class: "btn", href: L.linkedin, target: "_blank", rel: "noopener", text: "LinkedIn" }),
           h("a", { class: "btn", href: L.github, target: "_blank", rel: "noopener", text: "GitHub" }),
           h("a", { class: "btn", href: "mailto:" + L.email, text: "Email" }))] },
-    { label: "Settings", open: settingsMenu, preview: () => [
+    { label: "Settings", menu: true, open: settingsMenu, preview: () => [
         h("h2", { text: "Settings" }),
         h("ul", null, settingsMenu().items.filter(it => it.value).map(it => h("li", { text: `${it.label}: ${it.value()}` })))] }
   ]);
@@ -677,10 +706,15 @@ function gallery(list) {
   }));
 }
 const seenProjects = new Set();                // report each project once per visit
+let dwellTimer;
+/** Count a project view after `delay` ms on its page, so arrowing past it does not count */
+function countProject(key, delay) {
+  clearTimeout(dwellTimer);
+  if (key && !seenProjects.has(key)) dwellTimer = setTimeout(() => { seenProjects.add(key); hit(key); }, delay);
+}
 function projectScreen(p, i) {
-  const ok = isUrl(p.link), key = "project:" + slug(p.title);
-  if (!seenProjects.has(key)) { seenProjects.add(key); hit(key); }
-  return detail("Track " + (i + 1), () => [
+  const ok = isUrl(p.link);
+  return Object.assign(detail("Track " + (i + 1), () => [
     h("div", { class: "head" }, art(DATA.initials, null, i + 1),
       h("div", null, h("h2", { text: p.title }), h("p", { class: "sub", text: `${p.album} | ${p.date}` }))),
     h("p", { class: "sub", text: p.artist }),
@@ -691,13 +725,13 @@ function projectScreen(p, i) {
     ok ? h("a", { class: "btn", href: p.link, target: "_blank", rel: "noopener", text: p.linkLabel || "Open live demo" }) : null,
     isUrl(p.repo) ? h("a", { class: "btn", href: p.repo, target: "_blank", rel: "noopener", text: "View code on GitHub" }) : null,
     p.linkNote ? h("p", { class: "sub", text: p.linkNote }) : null
-  ]);                                          // selecting a project only shows this page; the button opens the site
+  ]), { countKey: "project:" + slug(p.title) });   // selecting a project only shows this page; the buttons open links
 }
 
 /** About: bio, then awards and leadership as grouped rows */
 function aboutMenu() {
   const A = DATA.about;
-  const row = (a, group) => ({ label: a.title, group, open: () => detail(group, () => [
+  const row = (a, group, groupSub) => ({ label: a.title, group, groupSub, open: () => detail(group, () => [
     h("h2", { text: a.title }), when(a) ? h("p", { class: "sub", text: when(a) }) : null,
     a.desc ? h("p", { text: a.desc }) : null,
     a.notes && a.notes.length ? [h("h3", { text: "Relevant Coursework" }), h("ul", null, a.notes.map(n => h("li", { text: n })))] : null]) });
@@ -707,8 +741,8 @@ function aboutMenu() {
           h("div", null, h("h2", { text: DATA.name }), h("p", { class: "sub", text: `${A.role} | ${A.location}` }))),
         lookingFor(), A.bio.map(b => h("p", { text: b }))]) },
     ...A.education.map(a => row(a, "Education")),
-    ...DATA.awards.map(a => row(a, "Gold Records")),
-    ...DATA.leadership.map(a => row(a, "Liner Notes"))
+    ...DATA.awards.map(a => row(a, "Gold Records", "Awards")),
+    ...DATA.leadership.map(a => row(a, "Liner Notes", "Leadership"))
   ]);
 }
 
@@ -787,7 +821,7 @@ const RENDER = {
     const ul = h("ul", { class: "menu", role: "menu", "aria-label": v.title });
     let group = null;
     v.items.forEach((it, i) => {
-      if (it.group && it.group !== group) ul.append(h("li", { class: "group", role: "presentation", text: it.group }));
+      if (it.group && it.group !== group) ul.append(h("li", { class: "group", role: "presentation", text: it.group + (it.groupSub ? " \u00B7 " + it.groupSub : "") }));
       group = it.group || null;
       ul.append(h("li", {
         role: "menuitem", "data-i": i,
@@ -798,9 +832,9 @@ const RENDER = {
           v.sel = i; syncSel(); blip();
           if (already || !WIDE.matches) activate(it);
         }
-      }, h("span", null, h("span", { class: "in", text: it.label })),
+      }, h("span", null, h("span", { class: "in" }, it.label, it.sub ? h("small", { text: " \u00B7 " + it.sub }) : null)),
         it.value ? h("span", { class: "val", text: it.value() })
-                 : h("span", { class: "chev", "aria-hidden": "true", text: it.open ? ">" : "" })));
+                 : it.open ? h("span", { class: "chev" + (it.menu ? " m" : ""), "aria-hidden": "true" }) : null));
     });
     return ul;
   },
@@ -855,7 +889,7 @@ function show(dir) {
   $("#title").textContent = v.title;
   $("#bBack").hidden = stack.length < 2;
   if (v.kind === "menu") { fitLabels(); syncSel(true); }
-  else say(v.title + ". " + el.textContent.slice(0, 300));
+  else { say(v.title + ". " + el.textContent.slice(0, 300)); countProject(v.countKey, 0); }
   if (v.kind === "now") { updateProgress(); fitMarquee(); }
   startViz();
 }
@@ -869,20 +903,24 @@ function syncSel(force) {
   list.querySelectorAll("li[data-i]").forEach(li => {
     const on = +li.dataset.i === v.sel;
     li.classList.toggle("sel", on);
+    li.tabIndex = on ? 0 : -1;                 // Tab lands on the selected row; arrows move it
     if (on) { li.setAttribute("aria-current", "true"); cur = li; } else li.removeAttribute("aria-current");
   });
+  if (cur && list.contains(document.activeElement) && document.activeElement !== cur) cur.focus({ preventScroll: true });
   if (cur) {
     const t = cur.offsetTop, b = t + cur.offsetHeight;
     if (t < list.scrollTop) list.scrollTop = t;
     else if (b > list.scrollTop + list.clientHeight) list.scrollTop = b - list.clientHeight;
   }
-  say(`${v.title}: ${it.label}`);
+  say(`${v.title}: ${it.label}${it.sub ? ", " + it.sub : ""}`);
   if (WIDE.matches && (force || paneItem !== it)) renderPane(it);
+  syncUrl(false);
 }
 function renderPane(it) {
   paneItem = it;
   const s = !it.preview && it.open ? it.open() : null;
   const nodes = it.preview ? it.preview() : s && s.kind !== "menu" ? [RENDER[s.kind](s)] : [];
+  countProject(s && s.countKey, 2500);
   pane.textContent = "";
   const wrap = h("article", { class: "detail" });            // loose nodes share the page styling
   for (const n of nodes.flat(Infinity).filter(Boolean)) {
@@ -942,15 +980,67 @@ function updateStatus() {
 /* =====================================================================
    Navigation
    ===================================================================== */
-function push(v) { stack.push(v); show(1); }
-function back() { if (stack.length > 1) { stack.pop(); show(-1); } }
+/* Every screen has an address (#projects/kincard-dementia-care-app), so links can point at one project
+   and the browser's own Back button steps back through the menus. */
+let routing = false;                           // true while the URL is being applied, so it is not rewritten mid-way
+function routeOf() {
+  const segs = stack.slice(1).map(v => v.slug), t = topView();
+  if (t.kind === "menu" && stack.length > 1) segs.push(slug(t.items[t.sel].label));
+  return segs.length ? "#" + segs.join("/") : "";
+}
+function syncUrl(add) {
+  if (routing || document.body.classList.contains("plain")) return;
+  try { history[add ? "pushState" : "replaceState"]({ d: add ? stack.length : (history.state && history.state.d) || 0 }, "", routeOf() || location.pathname + location.search); }
+  catch (e) { /* some embedded previews forbid history changes */ }
+}
+/** Rebuild the menu stack from the address bar */
+function applyRoute(animate) {
+  const plain = location.hash === "#plain", was = stack.slice();
+  const leavingPlain = document.body.classList.contains("plain") && !plain;
+  setPlain(plain);
+  if (topView().el && (plain || (leavingPlain && routeOf() === location.hash))) return;   // player is already in the right place
+  const segs = plain ? [] : decodeURIComponent(location.hash.slice(1)).split("/").filter(Boolean);
+  let cur = mainMenu();
+  stack.length = 0; stack.push(cur);
+  for (const seg of segs) {
+    const at = cur.items.findIndex(x => slug(x.label) === seg);
+    if (at < 0) break;
+    cur.sel = at;
+    const it = cur.items[at];
+    if (!it.open || (!it.menu && WIDE.matches)) break;        // a page: on wide screens it shows in the preview
+    const next = it.open(); next.slug = seg; stack.push(next);
+    if (next.kind !== "menu") break;
+    cur = next;
+  }
+  const from = was[stack.length], t = topView();              // going back: keep the row we came from highlighted
+  if (from && t.kind === "menu" && stack.length < was.length) {
+    const at = t.items.findIndex(x => slug(x.label) === from.slug);
+    if (at >= 0 && segs.length < stack.length) t.sel = at;
+  }
+  paneItem = null; routing = true; show(animate ? Math.sign(stack.length - was.length) : 0); routing = false;
+}
+let skipPop = false;                           // set when our own Back button already redrew the screen
+window.addEventListener("popstate", () => { if (skipPop) { skipPop = false; return; } applyRoute(true); });
+
+function push(v) {
+  v.slug = v.slug || slug(v.title);
+  stack.push(v);
+  routing = true; show(1); routing = false;
+  syncUrl(true);
+}
+function back() {
+  if (stack.length < 2) return;
+  const viaHistory = history.state && history.state.d === stack.length;   // this screen has its own history entry
+  stack.pop();
+  routing = true; show(-1); routing = false;
+  if (viaHistory) { skipPop = true; history.back(); } else syncUrl(false);
+}
 /** Enter / click on a menu row */
 function activate(it) {
   if (it.act) return it.act();
-  const s = it.open();
+  const s = it.open(); s.slug = slug(it.label);
   if (s.kind === "menu" || !WIDE.matches) return push(s);    // content pages only open full-width on narrow screens
-  if (s.kind === "now") togglePlay();                        // on wide screens the page is already in the preview
-  else if (s.action) s.action.run();
+  if (s.action) s.action.run();                              // on wide screens the page is already in the preview
 }
 /** Up / Down */
 function tick(dir) {
@@ -979,8 +1069,8 @@ function center() {
 /** Easter egg: double-click the title to jump to a random project */
 function randomProject() {
   const i = Math.floor(Math.random() * DATA.projects.length);
-  jump(projectsMenu, i);
-  if (!WIDE.matches) push(projectScreen(DATA.projects[i], i));
+  jump("Projects", i);
+  if (!WIDE.matches) push(Object.assign(projectScreen(DATA.projects[i], i), { slug: slug(DATA.projects[i].title) }));
   overlay("Shuffle!");
 }
 
@@ -1021,7 +1111,7 @@ for (const ev of ["pointerdown", "keydown"]) window.addEventListener(ev, () => {
 /* Switching between wide and narrow layouts */
 WIDE.addEventListener("change", () => {
   while (WIDE.matches && stack.length > 1 && topView().kind !== "menu") stack.pop();   // pages live in the preview when wide
-  paneItem = null; refresh();
+  paneItem = null; refresh(); syncUrl(false);
 });
 window.addEventListener("resize", () => { fitMarquee(); fitLabels(); });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitMarquee(); fitLabels(); });   // widths change once the pixel font loads
@@ -1030,14 +1120,18 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fi
    Plain view, status bar clock + battery, boot
    ===================================================================== */
 function setPlain(on) {
+  if (on && !document.body.classList.contains("plain")) window.scrollTo(0, 0);
   document.body.classList.toggle("plain", on);
   $("#fallback").classList.toggle("sr-only", !on);
-  if (on) { if (location.hash !== "#plain") history.replaceState(null, "", "#plain"); window.scrollTo(0, 0); }
-  else if (location.hash) history.replaceState(null, "", location.pathname + location.search);
 }
-$("#bPlain").addEventListener("click", () => setPlain(true));
-$("#bPlayer").addEventListener("click", () => setPlain(false));
-window.addEventListener("hashchange", () => setPlain(location.hash === "#plain"));
+$("#bPlain").addEventListener("click", () => {
+  try { history.pushState({ plain: 1 }, "", "#plain"); } catch (e) { /* ignore */ }
+  setPlain(true);
+});
+$("#bPlayer").addEventListener("click", () => {
+  if (history.state && history.state.plain) return history.back();   // popstate restores the player
+  setPlain(false); syncUrl(false);
+});
 
 function tickClock() {
   $("#clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]\.?M\.?/i, "");
@@ -1074,9 +1168,8 @@ applyTheme();
 buildFallback();
 tickClock(); setInterval(tickClock, 15000);
 stack.push(mainMenu());
-show(0);
+applyRoute(false);                             // opens whatever the address points at (a project, #plain, or the main menu)
 updateStatus();
-setPlain(location.hash === "#plain");
 // Count one visit per browser session
 try { if (!sessionStorage.getItem("mp3_seen")) { sessionStorage.setItem("mp3_seen", "1"); hit("view"); } } catch (e) { hit("view"); }
 </script>

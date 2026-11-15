@@ -17,6 +17,7 @@ const ALLOWED = (process.env.ALLOWED_ORIGINS || "https://alexanderlee2008.github
 const HASH = "counts";
 const KEY_RE = /^(view|(project|song):[a-z0-9-]{1,40})$/;
 const MAX_KEYS = 200;                       // stops junk keys from filling the store
+const MAX_PER_MINUTE = 30;                  // writes allowed per visitor address per minute
 
 /** Run one Redis command, e.g. redis(["HINCRBY", "counts", "view", 1]) */
 async function redis(cmd) {
@@ -64,6 +65,11 @@ module.exports = async function handler(req, res) {
       if (typeof body === "string") { try { body = JSON.parse(body); } catch (e) { body = null; } }
       const key = body && body.key;
       if (typeof key !== "string" || !KEY_RE.test(key)) return res.status(400).json({ error: "bad key" });
+      // Simple rate limit: a per-address counter that expires after a minute
+      const ip = String(req.headers["x-forwarded-for"] || "unknown").split(",")[0].trim();
+      const used = await redis(["INCR", "rl:" + ip]);
+      if (used === 1) await redis(["EXPIRE", "rl:" + ip, 60]);
+      if (used > MAX_PER_MINUTE) return res.status(429).json({ error: "slow down" });
       const exists = await redis(["HEXISTS", HASH, key]);
       if (!exists && (await redis(["HLEN", HASH])) >= MAX_KEYS) return res.status(400).json({ error: "too many keys" });
       const n = await redis(["HINCRBY", HASH, key, 1]);
