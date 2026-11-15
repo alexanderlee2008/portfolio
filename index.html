@@ -239,7 +239,7 @@ const DATA = {
   },
   // Counter backend (api/counts.js on Vercel). Leave "" to turn counting and the Charts menu off.
   // Example: "https://your-project.vercel.app/api/counts"
-  api: "https://portfolio-git-main-al08.vercel.app/api/counts",
+  api: "https://portfolio-mu-sandy-2lq0sdgm6g.vercel.app/api/counts",
   projects: [
     {
       title: "KinCard: Dementia Care App",
@@ -380,9 +380,11 @@ function art(label, cover, i = 0) {
   return a;
 }
 /** Tell the backend something happened: "view", "project:<slug>" or "song:<slug>". Fails silently. */
+// When the page itself is served from Vercel, call the API on the same host (no cross-site request).
+const API = !DATA.api ? "" : location.hostname.endsWith(".vercel.app") ? new URL(DATA.api).pathname : DATA.api;
 function hit(key) {
-  if (!DATA.api) return;
-  fetch(DATA.api, { method: "POST", body: JSON.stringify({ key }), keepalive: true }).catch(() => {});
+  if (!API) return;
+  fetch(API, { method: "POST", body: JSON.stringify({ key }), keepalive: true }).catch(() => {});
 }
 function openLink(u) { if (u.startsWith("mailto:")) location.href = u; else window.open(u, "_blank", "noopener"); }
 
@@ -608,7 +610,7 @@ function chartsScreen() {
       h("h3", { text: "Top Projects" }), h("ol", null, rows("project:", DATA.projects)),
       h("h3", { text: "Most Played" }), h("ol", null, rows("song:", DATA.playlist))
     ]);
-  fetch(DATA.api).then(r => { if (!r.ok) throw 0; return r.json(); })
+  fetch(API).then(r => { if (!r.ok) throw 0; return r.json(); })
     .then(j => { counts = j; }, () => { failed = true; })
     .then(() => { if (topView() === v) show(0); });
   return v;
