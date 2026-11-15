@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Alexander Lee | Portfolio</title>
 <meta name="description" content="Alexander Lee, first-year Engineering student at UBC. Projects in AI/ML, LLM integration, and systems programming, presented as a playable retro MP3 player.">
+<meta property="og:title" content="Alexander Lee | Portfolio">
+<meta property="og:description" content="A portfolio you navigate like a retro MP3 player. Projects in AI/ML, LLM integration, and systems programming.">
+<meta property="og:type" content="website">
 <meta name="theme-color" content="#0d0e11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c9ccd2'/%3E%3Crect x='6' y='4' width='20' height='10' rx='2' fill='%23223'/%3E%3Ccircle cx='16' cy='22' r='6' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +20,7 @@ html, body { height: 100%; margin: 0; }
 body {
   /* --u is the device's em size. The player fills the window: 22 x 34.6 em when stacked. */
   --u: min(94vw / 22, 88vh / 34.6);
+  --u: min(94vw / 22, 88dvh / 34.6);     /* dvh tracks mobile browser bars; ignored where unsupported */
   --pixel: "VT323", "Courier New", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: radial-gradient(circle at 50% 35%, #23262d 0%, #0d0e11 65%);
@@ -56,7 +60,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: repeating-linear-gradient(rgba(0,0,0,.035) 0 1px, transparent 1px 3px);
 }
 .status {
-  height: 1.4em; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .4em; padding: 0 .5em;
+  height: 1.4em; display: flex; justify-content: space-between; align-items: center; padding: 0 .5em;
   font-family: var(--pixel); font-size: 1.15em; line-height: 1;
   background: linear-gradient(#fdfdfe, #c9d2db); border-bottom: 1px solid #98a3ae;
   position: relative; z-index: 2;
@@ -65,7 +69,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .st-r { justify-content: flex-end; }
 .st-l svg { width: .6em; height: .6em; fill: currentColor; }
 .st-l small { font-size: .8em; letter-spacing: .02em; }
-#title { min-width: 0; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#title { position: absolute; left: 50%; transform: translateX(-50%); max-width: 52%; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .batt { width: 1.25em; height: .62em; border: 1px solid currentColor; border-radius: .1em; padding: 1px; position: relative; }
 .batt::after { content: ""; position: absolute; right: -.18em; top: 22%; width: .12em; height: 56%; background: currentColor; }
 .batt i { display: block; height: 100%; width: 100%; background: #3aa655; }
@@ -116,7 +120,9 @@ ul.menu { list-style: none; padding: 0; font-family: var(--pixel); font-size: 1.
 .viz i { flex: 1; height: 10%; background: linear-gradient(#63adff, #1c5ccb); }
 
 /* Now Playing */
-.now { padding: .5em .7em; }
+.now { padding: .5em .7em; display: flex; flex-direction: column; }
+.now > * { flex: none; }
+.now .viz { flex: 1; min-height: 0; height: auto; margin-top: .3em; border: 0; }
 .now .count { font-family: var(--pixel); font-size: 1.1em; color: #51606f; }
 .now .head { margin-top: .3em; }
 .now .t { font-family: var(--pixel); font-size: 1.65em; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -170,7 +176,7 @@ ul.menu { list-style: none; padding: 0; font-family: var(--pixel); font-size: 1.
 
 /* Wide windows: screen on the left, wheel on the right (41 x 19 em) */
 @media (min-aspect-ratio: 6/5) {
-  body { --u: min(96vw / 41, 88vh / 19); }
+  body { --u: min(96vw / 41, 88vh / 19); --u: min(96vw / 41, 88dvh / 19); }
   .device { width: 41em; padding: 1.5em; display: flex; align-items: center; gap: 2em; }
   .screen { flex: 1; height: 16em; }
   .wheel { flex: none; margin: 0; }
@@ -295,9 +301,10 @@ const DATA = {
   },
   // Optional per track: cover: "./music/cover1.jpg", album: "Album name"
   playlist: [
-    { title: "[TRACK_1]", artist: "[ARTIST]", src: "./music/track1.mp3" },
-    { title: "[TRACK_2]", artist: "[ARTIST]", src: "./music/track2.mp3" },
-    { title: "[TRACK_3]", artist: "[ARTIST]", src: "./music/track3.mp3" }
+    // Demo chiptune loops generated for this site. Swap in your own songs any time.
+    { title: "Boot Sequence", artist: "LeePod Demo", src: "./music/track1.mp3" },
+    { title: "Low Battery", artist: "LeePod Demo", src: "./music/track2.mp3" },
+    { title: "Shuffle Mode", artist: "LeePod Demo", src: "./music/track3.mp3" }
   ]
 };
 
@@ -682,7 +689,8 @@ const RENDER = {
         h("div", null, title, h("div", { class: "a", text: t.artist }), h("div", { class: "al", text: t.album || DATA.deviceName + " Mix" }))),
       h("div", { class: "prog", role: "progressbar", "aria-label": "Song progress", "aria-valuemin": "0", "aria-valuemax": "100" }, fill),
       h("div", { class: "times" }, el, rem),
-      h("div", { class: "hint", text: "Hold center to scrub" }));
+      h("div", { class: "hint", text: "Hold center to scrub" }),
+      h("div", { class: "viz", "aria-hidden": "true" }, Array.from({ length: 24 }, () => h("i"))));
     np = { root, fill, el, rem, title };
     return root;
   }
@@ -771,7 +779,15 @@ function tick(dir) {
     if (s !== v.sel) { v.sel = s; syncSel(); }
   } else if (v.kind === "now" && state.cur >= 0) {
     if (state.scrub) seek(dir); else setVolume(dir);
-  } else v.el.scrollTop += dir * v.el.clientHeight * 0.22;   // long text scrolls inside the screen
+  } else scrollText(v, dir);                                 // long text scrolls inside the screen
+}
+/** Smoothly scroll a text screen one notch; quick successive ticks add up instead of cancelling */
+function scrollText(v, dir) {
+  const el = v.el, now = performance.now();
+  const base = now - (v.lastTick || 0) < 400 ? v.target : el.scrollTop;
+  v.target = clamp(base + dir * el.clientHeight * 0.22, 0, el.scrollHeight - el.clientHeight);
+  v.lastTick = now;
+  el.scrollTo({ top: v.target, behavior: REDUCED ? "auto" : "smooth" });
 }
 function center() {
   const v = topView();
@@ -794,8 +810,8 @@ $("#bPrev").addEventListener("click", prevTrack);
 $("#bNext").addEventListener("click", () => nextTrack(false));
 $("#bPlay").addEventListener("click", togglePlay);
 
-/* Center: tap = select, double-tap on main menu = shuffle, long press on Now Playing = scrub */
-let tapTimer = null, pressTimer = null, swallowCenter = false;
+/* Center: tap = select (no delay), double-tap from the main menu = shuffle, long press on Now Playing = scrub */
+let lastMainTap = 0, pressTimer = null, swallowCenter = false;
 const bCenter = $("#bCenter");
 bCenter.addEventListener("pointerdown", () => {
   if (topView().kind !== "now" || state.cur < 0) return;
@@ -804,9 +820,13 @@ bCenter.addEventListener("pointerdown", () => {
 for (const ev of ["pointerup", "pointerleave", "pointercancel"]) bCenter.addEventListener(ev, () => clearTimeout(pressTimer));
 bCenter.addEventListener("click", e => {
   if (swallowCenter) { swallowCenter = false; return; }
-  if (stack.length > 1 || e.detail === 0) return center();   // detail 0 = keyboard activation
-  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; randomProject(); }
-  else tapTimer = setTimeout(() => { tapTimer = null; center(); }, 240);
+  const now = performance.now(), tapped = e.detail !== 0;    // detail 0 = keyboard activation
+  if (tapped && stack.length > 1 && now - lastMainTap < 350) {
+    lastMainTap = 0; stack.length = 1;                       // undo the first tap's navigation
+    return randomProject();
+  }
+  if (tapped && stack.length === 1) lastMainTap = now;
+  center();
 });
 
 /* ---- Circular drag on the wheel (mouse + touch via pointer events) ---- */
@@ -858,8 +878,8 @@ document.addEventListener("keydown", e => {
   const onControl = e.target.closest && e.target.closest("button, a");
   const now = topView().kind === "now";
   switch (e.key) {
-    case "ArrowUp": tick(-1); break;
-    case "ArrowDown": tick(1); break;
+    case "ArrowUp": tick(now && state.cur >= 0 ? 1 : -1); break;      // on Now Playing, Up = louder
+    case "ArrowDown": tick(now && state.cur >= 0 ? -1 : 1); break;
     case "ArrowLeft": if (!now) return; prevTrack(); break;
     case "ArrowRight": if (!now) return; nextTrack(false); break;
     case "Enter": if (onControl) return; center(); break;       // focused buttons handle Enter themselves
@@ -876,7 +896,9 @@ for (const ev of ["pointerdown", "keydown"]) window.addEventListener(ev, () => {
 /* =====================================================================
    Status bar clock + battery, plain-text fallback, boot
    ===================================================================== */
-function tickClock() { $("#clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function tickClock() {
+  $("#clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]\.?M\.?/i, "");
+}
 if (navigator.getBattery) navigator.getBattery().then(b => {
   const u = () => { $("#batt").style.width = Math.round(b.level * 100) + "%"; };
   u(); b.addEventListener("levelchange", u);
