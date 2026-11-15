@@ -72,7 +72,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* Menus */
 ul.menu { list-style: none; padding: .2em 0; font-family: var(--pixel); font-size: 1.75em; line-height: 1.25; }
 .menu li { display: flex; justify-content: space-between; gap: .5em; padding: 0 .5em; cursor: pointer; }
-.menu li span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.menu li > span:first-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* Names too long for the column scroll through when hovered or selected */
+@media (prefers-reduced-motion: no-preference) {
+  .menu li.long:hover > span:first-child, .menu li.long.sel > span:first-child { text-overflow: clip; }
+  .menu li.long:hover .in, .menu li.long.sel .in { display: inline-block; animation: marquee 4.5s ease-in-out infinite alternate; }
+}
 .menu li .val { opacity: .7; white-space: nowrap; }
 .menu li .chev { visibility: hidden; }
 .menu li[data-i]:not(.sel):hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
@@ -767,7 +772,7 @@ const RENDER = {
           v.sel = i; syncSel(); blip();
           if (already || !WIDE.matches) activate(it);
         }
-      }, h("span", { text: it.label }),
+      }, h("span", null, h("span", { class: "in", text: it.label })),
         it.value ? h("span", { class: "val", text: it.value() })
                  : h("span", { class: "chev", "aria-hidden": "true", text: it.open ? ">" : "" })));
     });
@@ -822,7 +827,7 @@ function show(dir) {
   }
   $("#title").textContent = v.title;
   $("#bBack").hidden = stack.length < 2;
-  if (v.kind === "menu") syncSel(true);
+  if (v.kind === "menu") { fitLabels(); syncSel(true); }
   else say(v.title + ". " + el.textContent.slice(0, 300));
   if (v.kind === "now") { updateProgress(); fitMarquee(); }
   startViz();
@@ -860,6 +865,16 @@ function renderPane(it) {
   pane.scrollTop = 0;
   if (np && np.root.isConnected) { updateProgress(); fitMarquee(); }
   startViz();
+}
+/** Mark menu rows whose name is cut off, and tell CSS how far the name has to travel */
+function fitLabels() {
+  const v = topView(); if (!v || v.kind !== "menu") return;
+  v.el.querySelectorAll("li[data-i]").forEach(li => {
+    const box = li.firstChild, over = box.firstChild.getBoundingClientRect().width - box.clientWidth;
+    li.classList.toggle("long", over > 2);
+    li.style.setProperty("--shift", -(over + 6) + "px");
+    if (over > 2) li.title = box.textContent; else li.removeAttribute("title");
+  });
 }
 function fitMarquee() {
   if (!np || !np.root.isConnected) return;
@@ -980,7 +995,8 @@ WIDE.addEventListener("change", () => {
   while (WIDE.matches && stack.length > 1 && topView().kind !== "menu") stack.pop();   // pages live in the preview when wide
   paneItem = null; refresh();
 });
-window.addEventListener("resize", fitMarquee);
+window.addEventListener("resize", () => { fitMarquee(); fitLabels(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitMarquee(); fitLabels(); });   // widths change once the pixel font loads
 
 /* =====================================================================
    Plain view, status bar clock + battery, boot
