@@ -91,7 +91,7 @@ ul.menu { list-style: none; padding: 0; font-family: var(--pixel); font-size: 1.
 .detail h2 { font-size: 1.75em; }
 .detail h3 { font-size: 1.4em; margin-top: .6em; color: #1c5ccb; }
 .detail p { margin: .45em 0; }
-.detail ul { margin: .4em 0; padding-left: 1.15em; }
+.detail ul, .detail ol { margin: .4em 0; padding-left: 1.3em; }
 .detail li { margin: .25em 0; }
 .detail a { color: #1c5ccb; font-weight: 600; }
 .detail .sub { color: #51606f; font-size: .92em; margin: .15em 0 0; }
@@ -235,8 +235,11 @@ const DATA = {
     linkedin: "https://linkedin.com/in/alexander-lee-36aa4935b",
     github: "https://github.com/alexanderlee2008",
     email: "leea26@student.ubc.ca",
-    resume: "./resume.pdf"
+    resume: "./Alexander_Lee_Resume.pdf"
   },
+  // Counter backend (api/counts.js on Vercel). Leave "" to turn counting and the Charts menu off.
+  // Example: "https://your-project.vercel.app/api/counts"
+  api: "https://portfolio-git-main-al08.vercel.app/api/counts",
   projects: [
     {
       title: "KinCard: Dementia Care App",
@@ -327,6 +330,7 @@ function h(tag, props, ...kids) {
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const isUrl = u => /^(https?:\/\/|mailto:|\.{0,2}\/)/.test(u || "");
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 // Routing <audio> through Web Audio mutes it on file:// and breaks iOS lock-screen playback,
@@ -374,6 +378,11 @@ function art(label, cover, i = 0) {
   if (cover) a.style.backgroundImage = `url("${cover}")`;
   else { a.append(h("b", { text: label })); a.style.filter = `hue-rotate(${i * 65}deg)`; }
   return a;
+}
+/** Tell the backend something happened: "view", "project:<slug>" or "song:<slug>". Fails silently. */
+function hit(key) {
+  if (!DATA.api) return;
+  fetch(DATA.api, { method: "POST", body: JSON.stringify({ key }), keepalive: true }).catch(() => {});
 }
 function openLink(u) { if (u.startsWith("mailto:")) location.href = u; else window.open(u, "_blank", "noopener"); }
 
@@ -427,7 +436,7 @@ function vizLoop(ts) {
    ===================================================================== */
 const track = () => DATA.playlist[state.cur];
 function loadTrack(i, play = true) {
-  state.cur = i; state.bad = false;
+  state.cur = i; state.bad = false; state.counted = false;
   audio.src = track().src; audio.load();
   setMediaMeta(); refreshNow(); updateStatus();
   if (play) playAudio();
@@ -484,7 +493,10 @@ audio.addEventListener("timeupdate", updateProgress);
 audio.addEventListener("durationchange", updateProgress);
 audio.addEventListener("play", updateStatus);
 audio.addEventListener("pause", updateStatus);
-audio.addEventListener("playing", () => { state.fails = 0; });
+audio.addEventListener("playing", () => {
+  state.fails = 0;
+  if (!state.counted) { state.counted = true; hit("song:" + slug(track().title)); }   // one play per load
+});
 audio.addEventListener("ended", () => nextTrack(true));
 audio.addEventListener("error", () => {
   if (state.cur < 0) return;
@@ -530,10 +542,11 @@ function mainMenu() {
     { label: "Gold Records", run: () => push(listMenu("Gold Records", DATA.awards)) },
     { label: "Liner Notes", run: () => push(listMenu("Liner Notes", DATA.leadership)) },
     { label: "Equalizer", run: () => push(eqScreen()) },
+    DATA.api ? { label: "Charts", run: () => push(chartsScreen()) } : null,
     { label: "Resume", run: () => push(resumeScreen()) },
     { label: "Links", run: () => push(linksMenu()) },
     { label: "Settings", run: () => push(settingsMenu()) }
-  ]);
+  ].filter(Boolean));
 }
 const nowScreen = () => ({ kind: "now", title: "Now Playing" });
 
@@ -549,6 +562,7 @@ function projectsMenu() {
 }
 function projectScreen(p, i) {
   const ok = isUrl(p.link);
+  hit("project:" + slug(p.title));
   return detail("Track " + (i + 1), () => [
     h("div", { class: "head" }, art(DATA.initials, null, i + 1),
       h("div", null, h("h2", { text: p.title }), h("p", { class: "sub", text: `${p.album} | ${p.date}` }))),
@@ -578,6 +592,26 @@ function eqScreen() {
       h("h3", { text: cat }), h("div", { class: "chips" }, list.map(s => h("span", { text: s })))
     ])
   ]);
+}
+
+/** Visitor and play counts pulled from the backend */
+function chartsScreen() {
+  let counts = null, failed = false;
+  const rows = (prefix, list) => list
+    .map(x => ({ title: x.title, n: counts[prefix + slug(x.title)] || 0 }))
+    .sort((a, b) => b.n - a.n)
+    .map(x => h("li", { text: `${x.title}: ${x.n}` }));
+  const v = detail("Charts", () => failed ? [h("p", { text: "Charts unavailable right now." })]
+    : !counts ? [h("p", { text: "Loading..." })]
+    : [
+      h("h2", { text: `${counts.view || 0} visits` }),
+      h("h3", { text: "Top Projects" }), h("ol", null, rows("project:", DATA.projects)),
+      h("h3", { text: "Most Played" }), h("ol", null, rows("song:", DATA.playlist))
+    ]);
+  fetch(DATA.api).then(r => { if (!r.ok) throw 0; return r.json(); })
+    .then(j => { counts = j; }, () => { failed = true; })
+    .then(() => { if (topView() === v) show(0); });
+  return v;
 }
 
 function resumeScreen() {
@@ -873,6 +907,8 @@ buildFallback();
 tickClock(); setInterval(tickClock, 15000);
 stack.push(mainMenu());
 show(0);
+// Count one visit per browser session
+try { if (!sessionStorage.getItem("mp3_seen")) { sessionStorage.setItem("mp3_seen", "1"); hit("view"); } } catch (e) { hit("view"); }
 updateStatus();
 window.addEventListener("resize", fitMarquee);
 </script>
