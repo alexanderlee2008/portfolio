@@ -15,7 +15,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body {
-  --w: min(360px, 92vw, 54vh);            /* device width; everything inside scales in em */
+  /* --u is the device's em size. The player fills the window: 22 x 34.6 em when stacked. */
+  --u: min(94vw / 22, 88vh / 34.6);
   --pixel: "VT323", "Courier New", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: radial-gradient(circle at 50% 35%, #23262d 0%, #0d0e11 65%);
@@ -27,12 +28,12 @@ body {
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 :focus-visible { outline: .18em solid #ffb000; outline-offset: .12em; }
-.tip { margin: 1.4em 0 0; font-size: 12px; color: #6d7380; text-align: center; padding: 0 1em; }
+.tip { position: fixed; left: 0; right: 0; bottom: 6px; margin: 0; font-size: 11px; color: #6d7380; text-align: center; padding: 0 1em; }
 
 /* ---------- Device body ---------- */
 .device {
   --b1: #eceef1; --b2: #b4b9c1; --wheel: #f8f8f9; --ink: #8b919b; --center: #dcdfe4;
-  font-size: calc(var(--w) / 22); width: 22em; padding: 1.3em 1.3em 2em;
+  font-size: var(--u); width: 22em; padding: 1.3em 1.3em 2em; margin-bottom: 20px;
   border-radius: 2.2em; position: relative; user-select: none; -webkit-user-select: none;
   background: linear-gradient(160deg, var(--b1), var(--b2));
   box-shadow: 0 2.2em 4em rgba(0,0,0,.6), 0 .3em .8em rgba(0,0,0,.5),
@@ -166,6 +167,14 @@ ul.menu { list-style: none; padding: 0; font-family: var(--pixel); font-size: 1.
   box-shadow: 0 .05em .2em rgba(0,0,0,.4), inset 0 -.1em .3em rgba(0,0,0,.15);
 }
 #bCenter:active { filter: brightness(.92); }
+
+/* Wide windows: screen on the left, wheel on the right (41 x 19 em) */
+@media (min-aspect-ratio: 6/5) {
+  body { --u: min(96vw / 41, 88vh / 19); }
+  .device { width: 41em; padding: 1.5em; display: flex; align-items: center; gap: 2em; }
+  .screen { flex: 1; height: 16em; }
+  .wheel { flex: none; margin: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .view, #overlay { transition: none; }
